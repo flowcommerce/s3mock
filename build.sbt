@@ -13,9 +13,9 @@ licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
 homepage := Some(url("https://github.com/flowcommerce/s3mock"))
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-stream" % "2.6.4",
+  "com.typesafe.akka" %% "akka-stream" % "2.6.3",
   "com.typesafe.akka" %% "akka-http" % "10.1.11",
-  "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.4" % "test",
+  "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.3" % "test",
   "org.scala-lang.modules" %% "scala-xml" % "1.3.0",
   "com.github.pathikrit" %% "better-files" % "3.8.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",

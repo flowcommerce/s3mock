@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
   "com.github.pathikrit" %% "better-files" % "3.9.1",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "com.amazonaws" % "aws-java-sdk-s3" % "1.11.808",
-  "org.scalatest" %% "scalatest" % "3.2.0" % "test",
+  "org.scalatestplus" %% "scalacheck-1-14" % "3.1.2.0" % Test,
   "ch.qos.logback" % "logback-classic" % "1.2.3" % "test",
   "org.iq80.leveldb" % "leveldb" % "0.12",
   "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "1.1.2" % "test"

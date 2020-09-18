@@ -16,7 +16,7 @@ homepage := Some(url("https://github.com/flowcommerce/s3mock"))
 //   com.typesafe.akka:akka-actor-typed_2.13:2.6.3
 // pulled in by
 //   com.typesafe.play:play_2.13:2.8.1
-val akkaVersion = "2.6.3"
+val akkaVersion = "2.6.9"
 val akkaHttpVersion = "10.1.10"
 
 libraryDependencies ++= Seq(
@@ -26,10 +26,10 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % "1.3.0",
   "com.github.pathikrit" %% "better-files" % "3.9.1",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
-  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.853",
-  "org.scalatestplus" %% "scalacheck-1-14" % "3.2.1.0" % Test,
-  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.1" % "test",
-  "org.scalatest" %% "scalatest-flatspec" % "3.2.1" % "test",
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.864",
+  "org.scalatestplus" %% "scalacheck-1-14" % "3.2.2.0" % Test,
+  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.2" % "test",
+  "org.scalatest" %% "scalatest-flatspec" % "3.2.2" % "test",
   "ch.qos.logback" % "logback-classic" % "1.2.3" % "test",
   "org.iq80.leveldb" % "leveldb" % "0.12",
   "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "1.1.2" % "test"

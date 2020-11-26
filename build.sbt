@@ -26,7 +26,7 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % "1.3.0",
   "com.github.pathikrit" %% "better-files" % "3.9.1",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
-  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.902",
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.908",
   "org.scalatestplus" %% "scalacheck-1-14" % "3.2.2.0" % Test,
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.3" % "test",
   "org.scalatest" %% "scalatest-flatspec" % "3.2.3" % "test",
@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, major)) if major >= 13 =>
-      Seq("org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0" % "test")
+      Seq("org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0" % "test")
     case _ =>
       Seq()
   }

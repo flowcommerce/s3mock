@@ -17,7 +17,7 @@ homepage := Some(url("https://github.com/flowcommerce/s3mock"))
 // pulled in by
 //   com.typesafe.play:play_2.13:2.8.1
 val akkaVersion = "2.6.10"
-val akkaHttpVersion = "10.2.2"
+val akkaHttpVersion = "10.1.10"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,

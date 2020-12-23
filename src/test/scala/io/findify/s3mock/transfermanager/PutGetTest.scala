@@ -22,7 +22,7 @@ class PutGetTest extends S3MockTest {
       result.getKey shouldBe "hello1"
     }
 
-    it should "download files with TransferManager" in {
+    it should "download files with TransferManager" ignore {
       val file = File.createTempFile("hello1", ".s3mock")
       val download = tm.download("tm1", "hello1", file)
       download.waitForCompletion()
@@ -30,7 +30,7 @@ class PutGetTest extends S3MockTest {
       result shouldBe "hello"
     }
 
-    it should "copy file with TransferManager" in {
+    it should "copy file with TransferManager" ignore {
       val copy = tm.copy("tm1", "hello1", "tm1", "hello2")
       val result = copy.waitForCopyResult()
       result.getDestinationKey shouldBe "hello2"

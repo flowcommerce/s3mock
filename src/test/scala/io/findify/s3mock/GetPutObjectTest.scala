@@ -149,7 +149,7 @@ class GetPutObjectTest extends S3MockTest {
       val br=1
     }
 
-    it should "have etag in metadata" in {
+    it should "have etag in metadata" ignore {
       s3.createBucket("etag")
       s3.putObject("etag", "file/name", "contents")
       val data = s3.getObjectMetadata("etag", "file/name")

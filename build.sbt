@@ -6,7 +6,7 @@ version := "0.2.29"
 
 organization := "io.flow"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.4"
 
 licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
 
@@ -16,8 +16,8 @@ homepage := Some(url("https://github.com/flowcommerce/s3mock"))
 //   com.typesafe.akka:akka-actor-typed_2.13:2.6.3
 // pulled in by
 //   com.typesafe.play:play_2.13:2.8.1
-val akkaVersion = "2.6.10"
-val akkaHttpVersion = "10.2.2"
+val akkaVersion = "2.6.11"
+val akkaHttpVersion = "10.2.3"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,

@@ -1,6 +1,6 @@
 # S3 mock library for Java/Scala
 
-[![Build Status](https://travis-ci.org/findify/s3mock.svg?branch=master)](https://travis-ci.org/findify/s3mock)
+[![Build Status](https://travis-ci.org/findify/s3mock.svg?branch=main)](https://travis-ci.org/findify/s3mock)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.findify/s3mock_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.findify/s3mock_2.12)
 
 Flow fork of s3mock for Scala 2.13 compatibility

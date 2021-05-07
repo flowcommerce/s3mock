@@ -1,9 +1,9 @@
 package io.findify.s3mock.route
 
 import java.util
-
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.typesafe.scalalogging.LazyLogging
 import io.findify.s3mock.error.{InternalErrorException, NoSuchBucketException, NoSuchKeyException}
@@ -22,20 +22,20 @@ case class CopyObjectMultipart()(implicit provider: Provider) extends LazyLoggin
   }
 
   def extractMetadata(req: HttpRequest): Option[ObjectMetadata] = {
-    req.headers.find(_.lowercaseName() == "x-amz-metadata-directive").map(_.value()) match {
+    req.headers.find(_.lowercaseName() == "x-amz-metadata-directive").map(_.value) match {
       case Some("REPLACE") =>
         val user = new util.HashMap[String, String]()
-        req.headers.filter(_.name().startsWith("x-amz-meta-")).map(h => h.name().replaceAll("x-amz-meta-", "") -> h.value()).foreach { case (k, v) => user.put(k, v) }
+        req.headers.filter(_.name().startsWith("x-amz-meta-")).map(h => h.name.replaceAll("x-amz-meta-", "") -> h.value()).foreach { case (k, v) => user.put(k, v) }
         val contentType = req.entity.contentType.value
         val meta = new ObjectMetadata()
         meta.setUserMetadata(user)
         meta.setContentType(contentType)
         Some(meta)
-      case Some("COPY") | None => None
+      case _ => None
     }
   }
 
-  def route(destBucket: String, destKey: String) = parameter('partNumber, 'uploadId) {
+  def route(destBucket: String, destKey: String): Route = parameter('partNumber, 'uploadId) {
     (partNumber:String, uploadId:String) =>
     put {
       headerValueByName("x-amz-copy-source") { source =>

@@ -7,6 +7,7 @@ organization := "io.flow"
 scalaVersion := "2.13.5"
 
 lazy val allScalacOptions = Seq(
+  "-deprecation",
   "-feature",
   "-Xfatal-warnings",
   "-unchecked",
@@ -54,7 +55,7 @@ libraryDependencies ++= {
   }
 }
 
-parallelExecution in Test := false
+Test / parallelExecution := false
 
 publishMavenStyle := true
 

@@ -16,7 +16,7 @@ import scala.util.{Failure, Success, Try}
 case class PutObjectMultipartStart()(implicit provider:Provider) extends LazyLogging {
   def route(bucket:String, path:String) = post {
     extractRequest { request =>
-      parameter('uploads) { mp =>
+      parameter(Symbol("uploads")) { mp =>
         complete {
           val metadata = MetadataUtil.populateObjectMetadata(request)
           logger.info(s"multipart upload start to $bucket/$path")

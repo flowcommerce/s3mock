@@ -14,7 +14,7 @@ import scala.language.postfixOps
   */
 case class ListBucket()(implicit provider:Provider) extends LazyLogging {
   def route(bucket:String) = get {
-    parameter('prefix?, 'delimiter?, Symbol("max-keys")?) { (prefix, delimiter, maxkeys) =>
+    parameter(Symbol("prefix")?, Symbol("delimiter")?, Symbol("max-keys")?) { (prefix, delimiter, maxkeys) =>
       complete {
         logger.info(s"listing bucket $bucket with prefix=$prefix, delimiter=$delimiter")
         Try(provider.listBucket(bucket, prefix, delimiter, maxkeys.map(_.toInt))) match {

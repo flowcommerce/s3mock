@@ -9,6 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import io.findify.s3mock.error.{InternalErrorException, NoSuchBucketException, NoSuchKeyException}
 import io.findify.s3mock.provider.Provider
 
+import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
 case class CopyObjectMultipart()(implicit provider: Provider) extends LazyLogging {
@@ -35,6 +36,7 @@ case class CopyObjectMultipart()(implicit provider: Provider) extends LazyLoggin
     }
   }
 
+  @nowarn
   def route(destBucket: String, destKey: String): Route = parameter('partNumber, 'uploadId) {
     (partNumber:String, uploadId:String) =>
     put {

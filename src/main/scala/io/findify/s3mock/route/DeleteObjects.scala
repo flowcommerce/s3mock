@@ -15,7 +15,7 @@ import scala.util.{Failure, Success, Try}
   */
 case class DeleteObjects()(implicit provider: Provider) extends LazyLogging {
   def route(bucket:String) = post {
-    parameter('delete) { d =>
+    parameter(Symbol("delete")) { d =>
       entity(as[String]) { xml => {
         complete {
           val request = DeleteObjectsRequest(scala.xml.XML.loadString(xml).head)

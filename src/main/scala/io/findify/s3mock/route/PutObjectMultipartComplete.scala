@@ -14,7 +14,7 @@ import scala.util.{Failure, Success, Try}
   */
 case class PutObjectMultipartComplete()(implicit provider:Provider) extends LazyLogging {
   def route(bucket:String, path:String) = post {
-    parameter('uploadId) { uploadId =>
+    parameter(Symbol("uploadId")) { uploadId =>
       entity(as[String]) { xml =>
         complete {
           logger.info(s"multipart upload completed for $bucket/$path, id = $uploadId")

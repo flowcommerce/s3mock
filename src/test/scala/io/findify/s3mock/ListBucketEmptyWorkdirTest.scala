@@ -1,6 +1,6 @@
 package io.findify.s3mock
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Created by shutty on 8/30/16.

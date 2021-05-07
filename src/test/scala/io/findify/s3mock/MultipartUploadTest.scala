@@ -2,11 +2,10 @@ package io.findify.s3mock
 
 import java.io.ByteArrayInputStream
 import java.nio.charset.Charset
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.Sink
 import akka.util.ByteString
 import com.amazonaws.services.s3.model._
@@ -23,7 +22,7 @@ import scala.util.Random
 class MultipartUploadTest extends S3MockTest {
   override def behaviour(fixture: => Fixture) = {
     implicit val system = ActorSystem.create("test")
-    implicit val mat = ActorMaterializer()
+    implicit val mat = Materializer.createMaterializer(system)
     val http = Http(system)
     val s3 = fixture.client
     val port = fixture.port

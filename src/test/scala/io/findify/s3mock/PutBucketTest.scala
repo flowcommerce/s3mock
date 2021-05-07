@@ -1,10 +1,12 @@
 package io.findify.s3mock
+import com.amazonaws.services.s3.model.CreateBucketRequest
+
 import scala.jdk.CollectionConverters._
 /**
   * Created by shutty on 8/10/16.
   */
 class PutBucketTest extends S3MockTest {
-  override def behaviour(fixture: => Fixture) = {
+  override def behaviour(fixture: => Fixture): Unit = {
     val s3 = fixture.client
     it should "create buckets" in {
       s3.listBuckets().isEmpty shouldBe true
@@ -12,7 +14,7 @@ class PutBucketTest extends S3MockTest {
       s3.listBuckets().asScala.exists(_.getName == "hello") shouldBe true
     }
     it should "create buckets with region" in {
-      s3.createBucket("hello2", "us-west-1")
+      s3.createBucket(new CreateBucketRequest("hello2", "us-west-1"))
       s3.listBuckets().asScala.exists(_.getName == "hello2") shouldBe true
     }
   }

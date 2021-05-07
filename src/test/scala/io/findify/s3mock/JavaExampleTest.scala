@@ -1,7 +1,8 @@
 package io.findify.s3mock
 
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.amazonaws.services.s3.{AmazonS3Client, AmazonS3ClientBuilder}
+
 import scala.jdk.CollectionConverters._
 import scala.io.Source
 
@@ -21,7 +22,10 @@ class JavaExampleTest extends S3MockTest {
     }
 
     it should "upload files with basic credentials" in {
-      val s3b = new AmazonS3Client(new BasicAWSCredentials("foo", "bar"))
+      val s3b = AmazonS3ClientBuilder.standard
+        .withCredentials(new AWSStaticCredentialsProvider(
+          new BasicAWSCredentials("foo", "bar")
+        )).build()
       s3b.setEndpoint(s"http://127.0.0.1:$port")
       s3b.putObject("getput", "foo2", "bar2")
       val result = Source.fromInputStream(s3b.getObject("getput", "foo2").getObjectContent, "UTF-8").mkString

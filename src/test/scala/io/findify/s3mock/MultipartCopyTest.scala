@@ -1,28 +1,19 @@
 package io.findify.s3mock
 
-import java.io.ByteArrayInputStream
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
-import akka.util.ByteString
+import akka.stream.Materializer
 import com.amazonaws.services.s3.model._
 import org.apache.commons.codec.digest.DigestUtils
 
 import scala.jdk.CollectionConverters._
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.util.Random
 
 class MultipartCopyTest extends S3MockTest {
   override def behaviour(fixture: => Fixture) = {
     implicit val system = ActorSystem.create("test")
-    implicit val mat = ActorMaterializer()
-    val http = Http(system)
+    implicit val mat = Materializer.createMaterializer(system)
     val s3 = fixture.client
-    val port = fixture.port
 
     it should "upload copy multipart files" in {
       s3.createBucket("source").getName shouldBe "source"

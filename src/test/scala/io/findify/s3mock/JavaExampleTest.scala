@@ -1,6 +1,7 @@
 package io.findify.s3mock
 
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.s3.{AmazonS3Client, AmazonS3ClientBuilder}
 
 import scala.jdk.CollectionConverters._
@@ -25,8 +26,10 @@ class JavaExampleTest extends S3MockTest {
       val s3b = AmazonS3ClientBuilder.standard
         .withCredentials(new AWSStaticCredentialsProvider(
           new BasicAWSCredentials("foo", "bar")
-        )).build()
-      s3b.setEndpoint(s"http://127.0.0.1:$port")
+        ))
+        .withEndpointConfiguration(
+          new EndpointConfiguration(s"http://127.0.0.1:$port", "us-east-1")
+        ).build()
       s3b.putObject("getput", "foo2", "bar2")
       val result = Source.fromInputStream(s3b.getObject("getput", "foo2").getObjectContent, "UTF-8").mkString
       result shouldBe "bar2"

@@ -2,11 +2,10 @@ package io.findify.s3mock
 
 import java.io.ByteArrayInputStream
 import java.util
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, Materializer}
 import com.amazonaws.services.s3.model._
 import com.amazonaws.util.IOUtils
 
@@ -33,7 +32,7 @@ class GetPutObjectTest extends S3MockTest {
     }
     it should "be able to post data" in {
       implicit val system = ActorSystem.create("test")
-      implicit val mat = ActorMaterializer()
+      implicit val mat = Materializer.createMaterializer(system)
       val http = Http(system)
       if (!s3.listBuckets().asScala.exists(_.getName == "getput")) s3.createBucket("getput")
       val response = Await.result(http.singleRequest(HttpRequest(method = HttpMethods.POST, uri = s"http://127.0.0.1:$port/getput/foo2", entity = "bar")), 10.seconds)

@@ -24,7 +24,7 @@ case class PutObjectMultipart()(implicit provider: Provider, mat: Materializer) 
 
   private val defaultEntityEncoder = Flow[ByteString].map(identity)
 
-  def route(bucket: String, path: String) = parameter('partNumber, 'uploadId) { (partNumber: String, uploadId: String) =>
+  def route(bucket: String, path: String) = parameter(Symbol("partNumber"), Symbol("uploadId")) { (partNumber: String, uploadId: String) =>
     put {
       logger.debug(s"put multipart object bucket=$bucket path=$path")
       headerValueByName("x-amz-decoded-content-length") { decodedLength =>

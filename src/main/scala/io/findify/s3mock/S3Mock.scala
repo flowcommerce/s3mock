@@ -9,6 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import io.findify.s3mock.provider.{FileProvider, InMemoryProvider, Provider}
 import io.findify.s3mock.route._
 
+import scala.annotation.nowarn
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
@@ -22,6 +23,7 @@ class S3Mock(port:Int, provider:Provider)(implicit system:ActorSystem = ActorSys
   implicit val p = provider
   private var bind:Http.ServerBinding = _
 
+  @nowarn
   def start = {
     implicit val mat = ActorMaterializer()
     val http = Http(system)

@@ -19,7 +19,7 @@ import scala.util.Random
   * Created by shutty on 8/9/16.
   */
 class FileProvider(dir:String) extends Provider with LazyLogging {
-  val workDir = File(dir)
+  val workDir: File = File(dir)
   if (!workDir.exists) workDir.createDirectories()
 
   private val meta = new MapMetadataStore(dir)
@@ -115,7 +115,7 @@ class FileProvider(dir:String) extends Provider with LazyLogging {
     val file = File(s"$dir/$bucket/$key")
     file.createIfNotExists(createParents = true)
     val data = parts.fold(Array[Byte]())(_ ++ _)
-    file.writeBytes(data.toIterator)
+    file.writeBytes(data.iterator)
     File(s"$dir/.mp/$bucket/$key").delete()
     val hash = file.md5
     metadataStore.get(bucket, key).foreach {m =>

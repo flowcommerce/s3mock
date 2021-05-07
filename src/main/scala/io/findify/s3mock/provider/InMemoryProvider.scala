@@ -1,8 +1,5 @@
 package io.findify.s3mock.provider
 
-import java.time.Instant
-import java.util.{Date, UUID}
-
 import akka.http.scaladsl.model.DateTime
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.typesafe.scalalogging.LazyLogging
@@ -12,6 +9,7 @@ import io.findify.s3mock.request.{CompleteMultipartUpload, CreateBucketConfigura
 import io.findify.s3mock.response._
 import org.apache.commons.codec.digest.DigestUtils
 
+import java.util.UUID
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
 import scala.util.Random
@@ -48,7 +46,7 @@ class InMemoryProvider extends Provider with LazyLogging {
     val prefix2 = prefix.getOrElse("")
     bucketDataStore.get(bucket) match {
       case Some(bucketContent) =>
-        val matchingKeys = bucketContent.keysInBucket.filterKeys(_.startsWith(prefix2))
+        val matchingKeys = bucketContent.keysInBucket.view.filterKeys(_.startsWith(prefix2))
         val matchResults = matchingKeys map { case (name, content) =>
           Content(name, content.lastModificationTime, DigestUtils.md5Hex(content.data), content.data.length, "STANDARD")
         }
@@ -85,7 +83,7 @@ class InMemoryProvider extends Provider with LazyLogging {
   override def copyObjectMultipart(sourceBucket: String, sourceKey: String, destBucket: String, destKey: String, part: Int, uploadId:String, fromByte: Int, toByte: Int, newMeta: Option[ObjectMetadata] = None): CopyObjectResult = {
     val data = getObject(sourceBucket, sourceKey).bytes.slice(fromByte, toByte + 1)
     putObjectMultipartPart(destBucket, destKey, part, uploadId, data)
-    new CopyObjectResult(DateTime.now, DigestUtils.md5Hex(data))
+    CopyObjectResult(DateTime.now, DigestUtils.md5Hex(data))
   }
 
   override def getObject(bucket: String, key: String): GetObjectData = {

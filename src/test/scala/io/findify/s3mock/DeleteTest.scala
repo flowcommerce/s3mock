@@ -4,7 +4,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import com.amazonaws.services.s3.model.{AmazonS3Exception, DeleteObjectsRequest}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.util.Try
 import scala.concurrent.duration._

@@ -3,11 +3,11 @@ package io.findify.s3mock.route
 import java.io.StringWriter
 import java.net.URLDecoder
 import java.util.Date
-
 import akka.http.scaladsl.model.HttpEntity.Strict
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{RawHeader, `Last-Modified`}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import com.amazonaws.services.s3.Headers
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.util.DateUtils
@@ -15,14 +15,14 @@ import com.typesafe.scalalogging.LazyLogging
 import io.findify.s3mock.error.{InternalErrorException, NoSuchBucketException, NoSuchKeyException}
 import io.findify.s3mock.provider.{GetObjectData, Provider}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 /**
   * Created by shutty on 8/19/16.
   */
 case class GetObject()(implicit provider: Provider) extends LazyLogging {
-  def route(bucket: String, path: String, params: Map[String, String]) = get {
+  def route(bucket: String, path: String, params: Map[String, String]): Route = get {
 
     withRangeSupport {
       complete {
@@ -34,7 +34,7 @@ case class GetObject()(implicit provider: Provider) extends LazyLogging {
               case Some(meta) =>
                 val entity: Strict = ContentType.parse(meta.getContentType) match {
                   case Right(value) => HttpEntity(value, data)
-                  case Left(error) => HttpEntity(data)
+                  case Left(_) => HttpEntity(data)
                 }
 
                 if (params.contains("tagging")) {
@@ -78,13 +78,10 @@ case class GetObject()(implicit provider: Provider) extends LazyLogging {
 
 
   protected def handleTaggingRequest(meta: ObjectMetadata): HttpResponse = {
-    var root = <Tagging xmlns="http://s3.amazonaws.com/doc/2006-03-01/"></Tagging>
-    var tagset = <TagSet></TagSet>
-
-    var w = new StringWriter()
+    val w = new StringWriter()
 
     if (meta.getRawMetadata.containsKey("x-amz-tagging")){
-      var doc =
+      val doc =
         <Tagging xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
           <TagSet>
             {
@@ -104,10 +101,10 @@ case class GetObject()(implicit provider: Provider) extends LazyLogging {
         </Tagging>
 
 
-      xml.XML.write(w, doc, "UTF-8", true, null)
+      xml.XML.write(w, doc, "UTF-8", xmlDecl = true, doctype = null)
     } else {
-      var doc = <Tagging xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><TagSet></TagSet></Tagging>
-      xml.XML.write(w, doc, "UTF-8", true, null)
+      val doc = <Tagging xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><TagSet></TagSet></Tagging>
+      xml.XML.write(w, doc, "UTF-8", xmlDecl = true, doctype = null)
     }
 
     meta.setContentType("application/xml; charset=utf-8")

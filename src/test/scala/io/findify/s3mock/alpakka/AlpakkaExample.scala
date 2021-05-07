@@ -1,7 +1,7 @@
 package io.findify.s3mock.alpakka
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Sink
 import com.typesafe.config.ConfigFactory
@@ -23,9 +23,9 @@ object AlpakkaExample {
       "alpakka.s3.aws.region.default-region" -> "us-east-1"
     ).asJava)
     implicit val system = ActorSystem.create("test", config)
-    implicit val mat = ActorMaterializer()
+    implicit val mat = Materializer.createMaterializer(system)
     import system.dispatcher
     val posibleSource = S3.download("bucket", "key").runWith(Sink.head)
-    val contents = posibleSource.flatMap( obj => obj.map( content => content._1.runWith(Sink.head).map(_.utf8String)).getOrElse(Future.successful("")))
+    posibleSource.flatMap( obj => obj.map( content => content._1.runWith(Sink.head).map(_.utf8String)).getOrElse(Future.successful("")))
   }
 }

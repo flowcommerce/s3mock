@@ -1,22 +1,21 @@
 package io.findify.s3mock
 
 import akka.actor.ActorSystem
-import akka.stream.alpakka.s3.S3Settings
+import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.{ActorMaterializer, Materializer}
 import better.files.File
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, AnonymousAWSCredentials, BasicAWSCredentials, DefaultAWSCredentialsProviderChain}
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, AnonymousAWSCredentials}
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3Client, AmazonS3ClientBuilder}
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.transfer.{TransferManager, TransferManagerBuilder}
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import com.typesafe.config.{Config, ConfigFactory}
 import io.findify.s3mock.provider.{FileProvider, InMemoryProvider}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.io.Source
@@ -29,7 +28,7 @@ trait S3MockTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
   private val fileBasedPort = 8001
   private val fileSystemConfig = configFor("localhost", fileBasedPort)
   private val fileSystem = ActorSystem.create("testfile", fileSystemConfig)
-  private val fileMat = ActorMaterializer()(fileSystem)
+  private val fileMat = Materializer.createMaterializer(fileSystem)
   private val fileBasedS3 = clientFor("localhost", fileBasedPort)
   private val fileBasedServer = new S3Mock(fileBasedPort, new FileProvider(workDir))
   private val fileBasedTransferManager: TransferManager = TransferManagerBuilder.standard().withS3Client(fileBasedS3).build()
@@ -38,7 +37,7 @@ trait S3MockTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
   private val inMemoryPort = 8002
   private val inMemoryConfig = configFor("localhost", inMemoryPort)
   private val inMemorySystem = ActorSystem.create("testram", inMemoryConfig)
-  private val inMemoryMat = ActorMaterializer()(inMemorySystem)
+  private val inMemoryMat = Materializer.createMaterializer(inMemorySystem)
   private val inMemoryS3 = clientFor("localhost", inMemoryPort)
   private val inMemoryServer = new S3Mock(inMemoryPort, new InMemoryProvider)
   private val inMemoryTransferManager: TransferManager = TransferManagerBuilder.standard().withS3Client(inMemoryS3).build()
@@ -56,14 +55,14 @@ trait S3MockTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
     fixture.name should behave like behaviour(fixture)
   }
 
-  override def beforeAll = {
+  override def beforeAll(): Unit = {
     if (!File(workDir).exists) File(workDir).createDirectory()
     fileBasedServer.start
     inMemoryServer.start
-    super.beforeAll
+    super.beforeAll()
   }
-  override def afterAll = {
-    super.afterAll
+  override def afterAll(): Unit = {
+    super.afterAll()
     inMemoryServer.stop
     fileBasedServer.stop
     inMemoryTransferManager.shutdownNow()

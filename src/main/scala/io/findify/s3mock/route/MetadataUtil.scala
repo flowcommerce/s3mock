@@ -12,7 +12,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.util.{DateUtils, StringUtils}
 import com.typesafe.scalalogging.LazyLogging
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MetadataUtil extends LazyLogging {
 

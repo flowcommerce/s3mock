@@ -14,11 +14,10 @@ import org.apache.commons.codec.digest.DigestUtils
 
 import scala.util.{Failure, Success, Try}
 
-/**
-  * Created by shutty on 8/20/16.
+/** Created by shutty on 8/20/16.
   */
-case class PutObject()(implicit provider:Provider, mat:Materializer) extends LazyLogging {
-  def route(bucket:String, path:String) = put {
+case class PutObject()(implicit provider: Provider, mat: Materializer) extends LazyLogging {
+  def route(bucket: String, path: String) = put {
     extractRequest { request =>
       headerValueByName("authorization") { auth =>
         completeSigned(bucket, path)
@@ -28,10 +27,8 @@ case class PutObject()(implicit provider:Provider, mat:Materializer) extends Laz
     completePlain(bucket, path)
   }
 
-
-  def completeSigned(bucket:String, path:String) = extractRequest { request =>
+  def completeSigned(bucket: String, path: String) = extractRequest { request =>
     complete {
-
 
       logger.info(s"put object $bucket/$path (signed)")
       val result = request.entity.dataBytes
@@ -53,12 +50,13 @@ case class PutObject()(implicit provider:Provider, mat:Materializer) extends Laz
                 entity = InternalErrorException(t).toXML.toString()
               )
           }
-        }).runWith(Sink.head[HttpResponse])
+        })
+        .runWith(Sink.head[HttpResponse])
       result
     }
   }
 
-  def completePlain(bucket:String, path:String) = extractRequest { request =>
+  def completePlain(bucket: String, path: String) = extractRequest { request =>
     complete {
 
       logger.info(s"put object $bucket/$path (unsigned)")
@@ -80,7 +78,8 @@ case class PutObject()(implicit provider:Provider, mat:Materializer) extends Laz
                 entity = InternalErrorException(t).toXML.toString()
               )
           }
-        }).runWith(Sink.head[HttpResponse])
+        })
+        .runWith(Sink.head[HttpResponse])
       result
     }
   }

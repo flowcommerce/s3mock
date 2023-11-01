@@ -9,8 +9,7 @@ import scala.concurrent.Await
 import scala.util.Try
 import scala.concurrent.duration._
 
-/**
-  * Created by shutty on 8/11/16.
+/** Created by shutty on 8/11/16.
   */
 class DeleteTest extends S3MockTest {
   override def behaviour(fixture: => Fixture) = {
@@ -69,12 +68,18 @@ class DeleteTest extends S3MockTest {
       s3.createBucket("owntracks")
       s3.putObject("owntracks", "data/2017-07-31/10:34.json", "foo")
       s3.putObject("owntracks", "data/2017-07-31/16:23.json", "bar")
-      val requestData = """<?xml version="1.0" encoding="UTF-8"?><Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>data/2017-07-31/10:34.json</Key></Object><Object><Key>data/2017-07-31/16:23.json</Key></Object></Delete>"""
-      val response = Await.result(Http(fixture.system).singleRequest(HttpRequest(
-        method = HttpMethods.POST,
-        uri = s"http://localhost:${fixture.port}/owntracks?delete",
-        entity = HttpEntity(ContentType(MediaTypes.`application/xml`, HttpCharsets.`UTF-8`), requestData)
-      )), 10.seconds)
+      val requestData =
+        """<?xml version="1.0" encoding="UTF-8"?><Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>data/2017-07-31/10:34.json</Key></Object><Object><Key>data/2017-07-31/16:23.json</Key></Object></Delete>"""
+      val response = Await.result(
+        Http(fixture.system).singleRequest(
+          HttpRequest(
+            method = HttpMethods.POST,
+            uri = s"http://localhost:${fixture.port}/owntracks?delete",
+            entity = HttpEntity(ContentType(MediaTypes.`application/xml`, HttpCharsets.`UTF-8`), requestData)
+          )
+        ),
+        10.seconds
+      )
       s3.listObjects("owntracks").getObjectSummaries.isEmpty shouldBe true
     }
   }

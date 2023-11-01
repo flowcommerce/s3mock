@@ -6,8 +6,7 @@ import com.amazonaws.services.s3.model.{ObjectMetadata, S3Object}
 
 import scala.jdk.CollectionConverters._
 
-/**
-  * Created by shutty on 8/10/16.
+/** Created by shutty on 8/10/16.
   */
 class GetPutObjectWithMetadataTest extends S3MockTest {
   override def behaviour(fixture: => Fixture): Unit = {

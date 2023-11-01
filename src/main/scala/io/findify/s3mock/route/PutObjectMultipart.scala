@@ -15,8 +15,7 @@ import org.apache.commons.codec.digest.DigestUtils
 
 import scala.util.{Failure, Success, Try}
 
-/**
-  * Created by shutty on 8/19/16.
+/** Created by shutty on 8/19/16.
   */
 case class PutObjectMultipart()(implicit provider: Provider, mat: Materializer) extends LazyLogging {
 
@@ -24,23 +23,26 @@ case class PutObjectMultipart()(implicit provider: Provider, mat: Materializer) 
 
   private val defaultEntityEncoder = Flow[ByteString].map(identity)
 
-  def route(bucket: String, path: String) = parameter(Symbol("partNumber"), Symbol("uploadId")) { (partNumber: String, uploadId: String) =>
-    put {
-      logger.debug(s"put multipart object bucket=$bucket path=$path")
-      headerValueByName("x-amz-decoded-content-length") { decodedLength =>
-        completeRequest(bucket, path, partNumber.toInt, uploadId, new S3ChunkedProtocolStage)
-      } ~ completeRequest(bucket, path, partNumber.toInt, uploadId)
-    } ~ post {
-      logger.debug(s"post multipart object bucket=$bucket path=$path")
-      completeRequest(bucket, path, partNumber.toInt, uploadId)
-    }
+  def route(bucket: String, path: String) = parameter(Symbol("partNumber"), Symbol("uploadId")) {
+    (partNumber: String, uploadId: String) =>
+      put {
+        logger.debug(s"put multipart object bucket=$bucket path=$path")
+        headerValueByName("x-amz-decoded-content-length") { decodedLength =>
+          completeRequest(bucket, path, partNumber.toInt, uploadId, new S3ChunkedProtocolStage)
+        } ~ completeRequest(bucket, path, partNumber.toInt, uploadId)
+      } ~ post {
+        logger.debug(s"post multipart object bucket=$bucket path=$path")
+        completeRequest(bucket, path, partNumber.toInt, uploadId)
+      }
   }
 
-  def completeRequest(bucket: String,
-                      path: String,
-                      partNumber: Int,
-                      uploadId: String,
-                      entityDecoder: EntityDecoder = defaultEntityEncoder) =
+  def completeRequest(
+    bucket: String,
+    path: String,
+    partNumber: Int,
+    uploadId: String,
+    entityDecoder: EntityDecoder = defaultEntityEncoder
+  ) =
     extractRequest { request =>
       complete {
         val result = request.entity.dataBytes
@@ -51,7 +53,7 @@ case class PutObjectMultipart()(implicit provider: Provider, mat: Materializer) 
               case Success(()) =>
                 HttpResponse(
                   StatusCodes.OK,
-                  entity = HttpEntity( ContentType(MediaTypes.`application/xml`, HttpCharsets.`UTF-8`), "")
+                  entity = HttpEntity(ContentType(MediaTypes.`application/xml`, HttpCharsets.`UTF-8`), "")
                 ).withHeaders(ETag(DigestUtils.md5Hex(data.toArray)))
               case Failure(e: NoSuchBucketException) =>
                 HttpResponse(
@@ -64,7 +66,8 @@ case class PutObjectMultipart()(implicit provider: Provider, mat: Materializer) 
                   entity = InternalErrorException(t).toXML.toString()
                 )
             }
-          }).runWith(Sink.head[HttpResponse])
+          })
+          .runWith(Sink.head[HttpResponse])
         result
       }
     }

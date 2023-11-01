@@ -11,11 +11,10 @@ import io.findify.s3mock.provider.Provider
 import java.util
 import scala.util.{Failure, Success, Try}
 
-/**
-  * Created by shutty on 11/23/16.
+/** Created by shutty on 11/23/16.
   */
 case class CopyObject()(implicit provider: Provider) extends LazyLogging {
-  def split(path: String):Option[(String,String)] = {
+  def split(path: String): Option[(String, String)] = {
     val noFirstSlash = path.replaceAll("^/+", "")
     val result = noFirstSlash.split("/").toList match {
       case bucket :: tail => Some(bucket -> tail.mkString("/"))
@@ -27,8 +26,11 @@ case class CopyObject()(implicit provider: Provider) extends LazyLogging {
   def extractMetadata(req: HttpRequest): Option[ObjectMetadata] = {
     req.headers.find(_.lowercaseName() == "x-amz-metadata-directive").map(_.value) match {
       case Some("REPLACE") =>
-        val user = new util.HashMap[String,String]()
-        req.headers.filter(_.name().startsWith("x-amz-meta-")).map(h => h.name.replaceAll("x-amz-meta-", "") -> h.value()).foreach { case (k,v) => user.put(k,v) }
+        val user = new util.HashMap[String, String]()
+        req.headers
+          .filter(_.name().startsWith("x-amz-meta-"))
+          .map(h => h.name.replaceAll("x-amz-meta-", "") -> h.value())
+          .foreach { case (k, v) => user.put(k, v) }
         val contentType = req.entity.contentType.value
         val meta = new ObjectMetadata()
         meta.setUserMetadata(user)
@@ -37,7 +39,7 @@ case class CopyObject()(implicit provider: Provider) extends LazyLogging {
       case _ => None
     }
   }
-  def route(destBucket:String, destKey:String): Route = put {
+  def route(destBucket: String, destKey: String): Route = put {
     headerValueByName("x-amz-copy-source") { source =>
       extractRequest { req =>
         complete {

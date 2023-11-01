@@ -26,7 +26,10 @@ case class CopyObjectMultipart()(implicit provider: Provider) extends LazyLoggin
     req.headers.find(_.lowercaseName() == "x-amz-metadata-directive").map(_.value) match {
       case Some("REPLACE") =>
         val user = new util.HashMap[String, String]()
-        req.headers.filter(_.name().startsWith("x-amz-meta-")).map(h => h.name.replaceAll("x-amz-meta-", "") -> h.value()).foreach { case (k, v) => user.put(k, v) }
+        req.headers
+          .filter(_.name().startsWith("x-amz-meta-"))
+          .map(h => h.name.replaceAll("x-amz-meta-", "") -> h.value())
+          .foreach { case (k, v) => user.put(k, v) }
         val contentType = req.entity.contentType.value
         val meta = new ObjectMetadata()
         meta.setUserMetadata(user)
@@ -38,48 +41,60 @@ case class CopyObjectMultipart()(implicit provider: Provider) extends LazyLoggin
 
   @nowarn
   def route(destBucket: String, destKey: String): Route = parameter('partNumber, 'uploadId) {
-    (partNumber:String, uploadId:String) =>
-    put {
-      headerValueByName("x-amz-copy-source") { source =>
-        extractRequest { req =>
-          complete {
-            val byteSeq = req.getHeader("x-amz-copy-source-range").get().value()
-            logger.error(req.toString())
-            logger.error(byteSeq)
-            val Array(fromByte, toByte) = byteSeq.substring(6).split("-")
-            val meta = extractMetadata(req)
-            split(source) match {
-              case Some((sourceBucket, sourceKey)) =>
-                Try(provider.copyObjectMultipart(sourceBucket, sourceKey, destBucket, destKey, partNumber.toInt, uploadId, fromByte.toInt, toByte.toInt, meta)) match {
-                  case Success(result) =>
-                    logger.info(s"copied object $sourceBucket/$sourceKey")
-                    HttpResponse(status = StatusCodes.OK, entity = result.toXML.toString())
-                  case Failure(e: NoSuchKeyException) =>
-                    logger.info(s"cannot copy object $sourceBucket/$sourceKey: no such key")
-                    HttpResponse(
-                      StatusCodes.NotFound,
-                      entity = e.toXML.toString()
+    (partNumber: String, uploadId: String) =>
+      put {
+        headerValueByName("x-amz-copy-source") { source =>
+          extractRequest { req =>
+            complete {
+              val byteSeq = req.getHeader("x-amz-copy-source-range").get().value()
+              logger.error(req.toString())
+              logger.error(byteSeq)
+              val Array(fromByte, toByte) = byteSeq.substring(6).split("-")
+              val meta = extractMetadata(req)
+              split(source) match {
+                case Some((sourceBucket, sourceKey)) =>
+                  Try(
+                    provider.copyObjectMultipart(
+                      sourceBucket,
+                      sourceKey,
+                      destBucket,
+                      destKey,
+                      partNumber.toInt,
+                      uploadId,
+                      fromByte.toInt,
+                      toByte.toInt,
+                      meta
                     )
-                  case Failure(e: NoSuchBucketException) =>
-                    logger.info(s"cannot copy object $sourceBucket/$sourceKey: no such bucket")
-                    HttpResponse(
-                      StatusCodes.NotFound,
-                      entity = e.toXML.toString()
-                    )
-                  case Failure(t) =>
-                    logger.error(s"cannot copy object $sourceBucket/$sourceKey: $t", t)
-                    HttpResponse(
-                      StatusCodes.InternalServerError,
-                      entity = InternalErrorException(t).toXML.toString()
-                    )
-                }
-              case None =>
-                logger.error(s"cannot copy object $source")
-                HttpResponse(StatusCodes.NotFound)
+                  ) match {
+                    case Success(result) =>
+                      logger.info(s"copied object $sourceBucket/$sourceKey")
+                      HttpResponse(status = StatusCodes.OK, entity = result.toXML.toString())
+                    case Failure(e: NoSuchKeyException) =>
+                      logger.info(s"cannot copy object $sourceBucket/$sourceKey: no such key")
+                      HttpResponse(
+                        StatusCodes.NotFound,
+                        entity = e.toXML.toString()
+                      )
+                    case Failure(e: NoSuchBucketException) =>
+                      logger.info(s"cannot copy object $sourceBucket/$sourceKey: no such bucket")
+                      HttpResponse(
+                        StatusCodes.NotFound,
+                        entity = e.toXML.toString()
+                      )
+                    case Failure(t) =>
+                      logger.error(s"cannot copy object $sourceBucket/$sourceKey: $t", t)
+                      HttpResponse(
+                        StatusCodes.InternalServerError,
+                        entity = InternalErrorException(t).toXML.toString()
+                      )
+                  }
+                case None =>
+                  logger.error(s"cannot copy object $source")
+                  HttpResponse(StatusCodes.NotFound)
+              }
             }
           }
         }
       }
-    }
   }
 }

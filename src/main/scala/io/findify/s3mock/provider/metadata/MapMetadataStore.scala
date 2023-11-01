@@ -11,12 +11,10 @@ import org.iq80.leveldb.impl.Iq80DBFactory
 
 import scala.collection.mutable
 
-/**
-  * Created by shutty on 3/13/17.
+/** Created by shutty on 3/13/17.
   */
 class MapMetadataStore(path: String) extends MetadataStore {
-  val bucketMetadata = mutable.Map[String,DB]()
-
+  val bucketMetadata = mutable.Map[String, DB]()
 
   override def put(bucket: String, key: String, meta: ObjectMetadata): Unit = {
     val map = load(path, bucket)
@@ -33,10 +31,12 @@ class MapMetadataStore(path: String) extends MetadataStore {
   }
 
   override def remove(bucket: String): Unit = {
-    bucketMetadata.get(bucket).foreach(db => {
-      db.close()
-      bucketMetadata.remove(bucket)
-    })
+    bucketMetadata
+      .get(bucket)
+      .foreach(db => {
+        db.close()
+        bucketMetadata.remove(bucket)
+      })
     val file = File(s"$path/$bucket.metadata")
     if (file.exists) file.delete()
   }

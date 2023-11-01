@@ -7,8 +7,7 @@ import io.findify.s3mock.S3MockTest
 
 import scala.io.Source
 
-/**
-  * Created by shutty on 11/23/16.
+/** Created by shutty on 11/23/16.
   */
 class PutGetTest extends S3MockTest {
   override def behaviour(fixture: => Fixture) = {

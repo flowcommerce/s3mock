@@ -1,10 +1,9 @@
 package io.findify.s3mock.request
 
-/**
-  * Created by shutty on 8/10/16.
+/** Created by shutty on 8/10/16.
   */
-case class CompleteMultipartUploadPart(partNumber:Int, etag:String)
-case class CompleteMultipartUpload(parts:List[CompleteMultipartUploadPart])
+case class CompleteMultipartUploadPart(partNumber: Int, etag: String)
+case class CompleteMultipartUpload(parts: List[CompleteMultipartUploadPart])
 
 object CompleteMultipartUploadPart {
   def apply(node: scala.xml.Node) = new CompleteMultipartUploadPart(
@@ -14,7 +13,7 @@ object CompleteMultipartUploadPart {
 }
 
 object CompleteMultipartUpload {
-  def apply(node:scala.xml.Node) = {
+  def apply(node: scala.xml.Node) = {
     val child = node \ "Part"
     new CompleteMultipartUpload(
       parts = child.map(n => CompleteMultipartUploadPart(n)).toList

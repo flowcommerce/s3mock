@@ -8,3 +8,5 @@ addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.7")
 addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.8.0")
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.6")
 addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.8.0")
+
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")

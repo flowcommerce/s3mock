@@ -5,8 +5,7 @@ import akka.http.scaladsl.{Http, HttpExt}
 import akka.stream.{ActorMaterializer, Materializer}
 import io.findify.s3mock.S3MockTest
 
-/**
-  * Created by shutty on 8/28/16.
+/** Created by shutty on 8/28/16.
   */
 trait AWSCliTest extends S3MockTest {
   implicit val system: ActorSystem = ActorSystem.create("awscli")

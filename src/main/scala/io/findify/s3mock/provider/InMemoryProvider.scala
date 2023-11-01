@@ -35,7 +35,12 @@ class InMemoryProvider extends Provider with LazyLogging {
     ListAllMyBuckets("root", UUID.randomUUID().toString, buckets.toList)
   }
 
-  override def listBucket(bucket: String, prefix: Option[String], delimiter: Option[String], maxkeys: Option[Int]): ListBucket = {
+  override def listBucket(
+    bucket: String,
+    prefix: Option[String],
+    delimiter: Option[String],
+    maxkeys: Option[Int]
+  ): ListBucket = {
     def commonPrefix(dir: String, p: String, d: String): Option[String] = {
       dir.indexOf(d, p.length) match {
         case -1 => None
@@ -55,10 +60,18 @@ class InMemoryProvider extends Provider with LazyLogging {
           case Some(del) => matchResults.flatMap(f => commonPrefix(f.key, prefix2, del)).toList.sorted.distinct
           case None => Nil
         }
-        val filteredFiles: List[Content] = matchResults.filterNot(f => commonPrefixes.exists(p => f.key.startsWith(p))).toList
+        val filteredFiles: List[Content] =
+          matchResults.filterNot(f => commonPrefixes.exists(p => f.key.startsWith(p))).toList
         val count = maxkeys.getOrElse(Int.MaxValue)
         val result = filteredFiles.sortBy(_.key)
-        ListBucket(bucket, prefix, delimiter, commonPrefixes, result.take(count).take(count), isTruncated = result.size>count)
+        ListBucket(
+          bucket,
+          prefix,
+          delimiter,
+          commonPrefixes,
+          result.take(count).take(count),
+          isTruncated = result.size > count
+        )
       case None => throw NoSuchBucketException(bucket)
     }
   }
@@ -80,7 +93,17 @@ class InMemoryProvider extends Provider with LazyLogging {
     }
   }
 
-  override def copyObjectMultipart(sourceBucket: String, sourceKey: String, destBucket: String, destKey: String, part: Int, uploadId:String, fromByte: Int, toByte: Int, newMeta: Option[ObjectMetadata] = None): CopyObjectResult = {
+  override def copyObjectMultipart(
+    sourceBucket: String,
+    sourceKey: String,
+    destBucket: String,
+    destKey: String,
+    part: Int,
+    uploadId: String,
+    fromByte: Int,
+    toByte: Int,
+    newMeta: Option[ObjectMetadata] = None
+  ): CopyObjectResult = {
     val data = getObject(sourceBucket, sourceKey).bytes.slice(fromByte, toByte + 1)
     putObjectMultipartPart(destBucket, destKey, part, uploadId, data)
     CopyObjectResult(DateTime.now, DigestUtils.md5Hex(data))
@@ -88,18 +111,23 @@ class InMemoryProvider extends Provider with LazyLogging {
 
   override def getObject(bucket: String, key: String): GetObjectData = {
     bucketDataStore.get(bucket) match {
-      case Some(bucketContent) => bucketContent.keysInBucket.get(key) match {
-        case Some(keyContent) =>
-          logger.debug(s"reading object for s://$bucket/$key")
-          val meta = metadataStore.get(bucket, key)
-          GetObjectData(keyContent.data, meta)
-        case None => throw NoSuchKeyException(bucket, key)
-      }
+      case Some(bucketContent) =>
+        bucketContent.keysInBucket.get(key) match {
+          case Some(keyContent) =>
+            logger.debug(s"reading object for s://$bucket/$key")
+            val meta = metadataStore.get(bucket, key)
+            GetObjectData(keyContent.data, meta)
+          case None => throw NoSuchKeyException(bucket, key)
+        }
       case None => throw NoSuchBucketException(bucket)
     }
   }
 
-  override def putObjectMultipartStart(bucket: String, key: String, metadata: ObjectMetadata): InitiateMultipartUploadResult = {
+  override def putObjectMultipartStart(
+    bucket: String,
+    key: String,
+    metadata: ObjectMetadata
+  ): InitiateMultipartUploadResult = {
     bucketDataStore.get(bucket) match {
       case Some(_) =>
         val id = Math.abs(Random.nextLong()).toString
@@ -111,7 +139,13 @@ class InMemoryProvider extends Provider with LazyLogging {
     }
   }
 
-  override def putObjectMultipartPart(bucket: String, key: String, partNumber: Int, uploadId: String, data: Array[Byte]): Unit = {
+  override def putObjectMultipartPart(
+    bucket: String,
+    key: String,
+    partNumber: Int,
+    uploadId: String,
+    data: Array[Byte]
+  ): Unit = {
     bucketDataStore.get(bucket) match {
       case Some(_) =>
         logger.debug(s"uploading multipart chunk $partNumber for s3://$bucket/$key")
@@ -120,7 +154,12 @@ class InMemoryProvider extends Provider with LazyLogging {
     }
   }
 
-  override def putObjectMultipartComplete(bucket: String, key: String, uploadId: String, request: CompleteMultipartUpload): CompleteMultipartUploadResult = {
+  override def putObjectMultipartComplete(
+    bucket: String,
+    key: String,
+    uploadId: String,
+    request: CompleteMultipartUpload
+  ): CompleteMultipartUploadResult = {
     bucketDataStore.get(bucket) match {
       case Some(bucketContent) =>
         val completeBytes = multipartTempStore(uploadId).toSeq.map(_.data).fold(Array[Byte]())(_ ++ _)
@@ -128,7 +167,7 @@ class InMemoryProvider extends Provider with LazyLogging {
         multipartTempStore.remove(uploadId)
         logger.debug(s"completed multipart upload for s3://$bucket/$key")
         val hash = DigestUtils.md5Hex(completeBytes)
-        metadataStore.get(bucket, key).foreach {m =>
+        metadataStore.get(bucket, key).foreach { m =>
           m.setContentMD5(hash)
           m.setLastModified(org.joda.time.DateTime.now().toDate)
         }
@@ -137,7 +176,13 @@ class InMemoryProvider extends Provider with LazyLogging {
     }
   }
 
-  override def copyObject(sourceBucket: String, sourceKey: String, destBucket: String, destKey: String, newMeta: Option[ObjectMetadata] = None): CopyObjectResult = {
+  override def copyObject(
+    sourceBucket: String,
+    sourceKey: String,
+    destBucket: String,
+    destKey: String,
+    newMeta: Option[ObjectMetadata] = None
+  ): CopyObjectResult = {
     (bucketDataStore.get(sourceBucket), bucketDataStore.get(destBucket)) match {
       case (Some(srcBucketContent), Some(dstBucketContent)) =>
         srcBucketContent.keysInBucket.get(sourceKey) match {
@@ -157,20 +202,22 @@ class InMemoryProvider extends Provider with LazyLogging {
 
   override def deleteObject(bucket: String, key: String): Unit = {
     bucketDataStore.get(bucket) match {
-      case Some(bucketContent) => bucketContent.keysInBucket.get(key) match {
-        case Some(_) =>
-          logger.debug(s"deleting object s://$bucket/$key")
-          bucketContent.keysInBucket.remove(key)
-          metadataStore.delete(bucket, key)
-        case None => bucketContent.keysInBucket.keys.find(_.startsWith(key)) match {
+      case Some(bucketContent) =>
+        bucketContent.keysInBucket.get(key) match {
           case Some(_) =>
-            logger.debug(s"recursive delete by prefix is not supported by S3")
-            ()
+            logger.debug(s"deleting object s://$bucket/$key")
+            bucketContent.keysInBucket.remove(key)
+            metadataStore.delete(bucket, key)
           case None =>
-            logger.warn(s"key does not exist")
-            throw NoSuchKeyException(bucket, key)
+            bucketContent.keysInBucket.keys.find(_.startsWith(key)) match {
+              case Some(_) =>
+                logger.debug(s"recursive delete by prefix is not supported by S3")
+                ()
+              case None =>
+                logger.warn(s"key does not exist")
+                throw NoSuchKeyException(bucket, key)
+            }
         }
-      }
       case None => throw NoSuchBucketException(bucket)
     }
   }

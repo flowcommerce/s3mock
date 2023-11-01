@@ -1,6 +1,6 @@
 package io.findify.s3mock
-/**
-  * Created by shutty on 8/9/16.
+
+/** Created by shutty on 8/9/16.
   */
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
@@ -18,10 +18,15 @@ class ListBucketsTest extends S3MockTest {
     it should "have correct xml content-type for bucket list" in {
       implicit val sys = fixture.system
       implicit val mat = fixture.mat
-      val response = Await.result(Http().singleRequest(HttpRequest(
-        method = HttpMethods.GET,
-        uri = Uri(s"http://localhost:${fixture.port}/")
-      )), 5.seconds)
+      val response = Await.result(
+        Http().singleRequest(
+          HttpRequest(
+            method = HttpMethods.GET,
+            uri = Uri(s"http://localhost:${fixture.port}/")
+          )
+        ),
+        5.seconds
+      )
       response.entity.contentType shouldBe ContentType(MediaTypes.`application/xml`, HttpCharsets.`UTF-8`)
     }
   }

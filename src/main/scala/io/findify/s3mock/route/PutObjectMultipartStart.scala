@@ -10,11 +10,10 @@ import io.findify.s3mock.provider.Provider
 
 import scala.util.{Failure, Success, Try}
 
-/**
-  * Created by shutty on 8/20/16.
+/** Created by shutty on 8/20/16.
   */
-case class PutObjectMultipartStart()(implicit provider:Provider) extends LazyLogging {
-  def route(bucket:String, path:String) = post {
+case class PutObjectMultipartStart()(implicit provider: Provider) extends LazyLogging {
+  def route(bucket: String, path: String) = post {
     extractRequest { request =>
       parameter(Symbol("uploads")) { mp =>
         complete {
@@ -25,7 +24,8 @@ case class PutObjectMultipartStart()(implicit provider:Provider) extends LazyLog
               HttpResponse(
                 StatusCodes.OK,
                 entity = HttpEntity(
-                  ContentTypes.`application/octet-stream`, result.toXML.toString().getBytes(StandardCharsets.UTF_8)
+                  ContentTypes.`application/octet-stream`,
+                  result.toXML.toString().getBytes(StandardCharsets.UTF_8)
                 )
               )
             case Failure(e: NoSuchBucketException) =>

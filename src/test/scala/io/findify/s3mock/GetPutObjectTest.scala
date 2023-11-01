@@ -15,8 +15,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.{Random, Try}
 
-/**
-  * Created by shutty on 8/10/16.
+/** Created by shutty on 8/10/16.
   */
 
 class GetPutObjectTest extends S3MockTest {
@@ -35,7 +34,12 @@ class GetPutObjectTest extends S3MockTest {
       implicit val mat = Materializer.createMaterializer(system)
       val http = Http(system)
       if (!s3.listBuckets().asScala.exists(_.getName == "getput")) s3.createBucket("getput")
-      val response = Await.result(http.singleRequest(HttpRequest(method = HttpMethods.POST, uri = s"http://127.0.0.1:$port/getput/foo2", entity = "bar")), 10.seconds)
+      val response = Await.result(
+        http.singleRequest(
+          HttpRequest(method = HttpMethods.POST, uri = s"http://127.0.0.1:$port/getput/foo2", entity = "bar")
+        ),
+        10.seconds
+      )
       getContent(s3.getObject("getput", "foo2")) shouldBe "bar"
     }
     it should "put objects in subdirs" in {
@@ -58,8 +62,17 @@ class GetPutObjectTest extends S3MockTest {
     it should "store tags and spit them back on get tagging requests" in {
       s3.createBucket("tbucket")
       s3.putObject(
-        new PutObjectRequest("tbucket", "taggedobj", new ByteArrayInputStream("content".getBytes("UTF-8")), new ObjectMetadata)
-          .withTagging(new ObjectTagging(List(new Tag("key1", "val1"), new Tag("key=&interesting", "value=something&stragne")).asJava))
+        new PutObjectRequest(
+          "tbucket",
+          "taggedobj",
+          new ByteArrayInputStream("content".getBytes("UTF-8")),
+          new ObjectMetadata
+        )
+          .withTagging(
+            new ObjectTagging(
+              List(new Tag("key1", "val1"), new Tag("key=&interesting", "value=something&stragne")).asJava
+            )
+          )
       )
       var tagging = s3.getObjectTagging(new GetObjectTaggingRequest("tbucket", "taggedobj")).getTagSet.asScala
       var tagMap = new util.HashMap[String, String]()
@@ -145,7 +158,7 @@ class GetPutObjectTest extends S3MockTest {
       s3.putObject("prefix", "some", "bar")
       val noSlash = Try(s3.getObject("prefix", "some/path"))
       val withSlash = Try(s3.getObject("prefix", "some"))
-      val br=1
+      val br = 1
     }
 
     it should "have etag in metadata" ignore {
@@ -158,10 +171,10 @@ class GetPutObjectTest extends S3MockTest {
     it should "not fail concurrent requests" in {
       s3.createBucket("concurrent")
       s3.putObject("concurrent", "file/name", "contents")
-      val results = Range(1, 100).par.map(_ => IOUtils.toString(s3.getObject("concurrent", "file/name").getObjectContent)).toList
+      val results =
+        Range(1, 100).par.map(_ => IOUtils.toString(s3.getObject("concurrent", "file/name").getObjectContent)).toList
       results.forall(_ == "contents") shouldBe true
     }
   }
 
 }
-

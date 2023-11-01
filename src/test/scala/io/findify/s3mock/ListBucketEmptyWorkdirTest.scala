@@ -2,8 +2,7 @@ package io.findify.s3mock
 
 import scala.jdk.CollectionConverters._
 
-/**
-  * Created by shutty on 8/30/16.
+/** Created by shutty on 8/30/16.
   */
 class ListBucketEmptyWorkdirTest extends S3MockTest {
   override def behaviour(fixture: => Fixture) = {

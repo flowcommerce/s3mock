@@ -16,7 +16,7 @@ import scala.jdk.CollectionConverters._
 
 object MetadataUtil extends LazyLogging {
 
-   def populateObjectMetadata(request: HttpRequest): ObjectMetadata = {
+  def populateObjectMetadata(request: HttpRequest): ObjectMetadata = {
     val metadata = new ObjectMetadata()
     val ignoredHeaders: util.HashSet[String] = new util.HashSet[String]()
     ignoredHeaders.add(Headers.DATE)
@@ -36,38 +36,50 @@ object MetadataUtil extends LazyLogging {
       //      else if (ignoredHeaders.contains(key)) {
       // ignore...
       //      }
-      else if (key.equalsIgnoreCase(Headers.LAST_MODIFIED)) try
-        metadata.setHeader(key, ServiceUtils.parseRfc822Date(header.value()))
+      else if (key.equalsIgnoreCase(Headers.LAST_MODIFIED))
+        try
+          metadata.setHeader(key, ServiceUtils.parseRfc822Date(header.value()))
 
-      catch {
-        case pe: Exception => logger.warn("Unable to parse last modified date: " + header.value(), pe)
-      }
-      else if (key.equalsIgnoreCase(Headers.CONTENT_LENGTH)) try
-        metadata.setHeader(key, java.lang.Long.parseLong(header.value()))
+        catch {
+          case pe: Exception => logger.warn("Unable to parse last modified date: " + header.value(), pe)
+        }
+      else if (key.equalsIgnoreCase(Headers.CONTENT_LENGTH))
+        try
+          metadata.setHeader(key, java.lang.Long.parseLong(header.value()))
 
-      catch {
-        case nfe: NumberFormatException => throw new AmazonClientException("Unable to parse content length. Header 'Content-Length' has corrupted data" + nfe.getMessage, nfe)
-      }
+        catch {
+          case nfe: NumberFormatException =>
+            throw new AmazonClientException(
+              "Unable to parse content length. Header 'Content-Length' has corrupted data" + nfe.getMessage,
+              nfe
+            )
+        }
       else if (key.equalsIgnoreCase(Headers.ETAG)) metadata.setHeader(key, ServiceUtils.removeQuotes(header.value()))
-      else if (key.equalsIgnoreCase(Headers.EXPIRES)) try
-        metadata.setHttpExpiresDate(DateUtils.parseRFC822Date(header.value()))
+      else if (key.equalsIgnoreCase(Headers.EXPIRES))
+        try
+          metadata.setHttpExpiresDate(DateUtils.parseRFC822Date(header.value()))
 
-      catch {
-        case pe: Exception => logger.warn("Unable to parse http expiration date: " + header.value(), pe)
-      }
+        catch {
+          case pe: Exception => logger.warn("Unable to parse http expiration date: " + header.value(), pe)
+        }
       //      else if (key.equalsIgnoreCase(Headers.EXPIRATION)) new ObjectExpirationHeaderHandler[ObjectMetadata]().handle(metadata, response)
       //      else if (key.equalsIgnoreCase(Headers.RESTORE)) new ObjectRestoreHeaderHandler[ObjectRestoreResult]().handle(metadata, response)
       //      else if (key.equalsIgnoreCase(Headers.REQUESTER_CHARGED_HEADER)) new S3RequesterChargedHeaderHandler[S3RequesterChargedResult]().handle(metadata, response)
-      else if (key.equalsIgnoreCase(Headers.S3_PARTS_COUNT)) try
-        metadata.setHeader(key, header.value().toInt)
+      else if (key.equalsIgnoreCase(Headers.S3_PARTS_COUNT))
+        try
+          metadata.setHeader(key, header.value().toInt)
 
-      catch {
-        case nfe: NumberFormatException => throw new AmazonClientException("Unable to parse part count. Header x-amz-mp-parts-count has corrupted data" + nfe.getMessage, nfe)
-      }
+        catch {
+          case nfe: NumberFormatException =>
+            throw new AmazonClientException(
+              "Unable to parse part count. Header x-amz-mp-parts-count has corrupted data" + nfe.getMessage,
+              nfe
+            )
+        }
       else metadata.setHeader(key, header.value())
     }
 
-    if(metadata.getContentType == null){
+    if (metadata.getContentType == null) {
       metadata.setContentType(request.entity.getContentType.toString)
     }
     metadata

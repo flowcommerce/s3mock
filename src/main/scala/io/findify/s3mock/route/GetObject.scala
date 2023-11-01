@@ -18,8 +18,7 @@ import io.findify.s3mock.provider.{GetObjectData, Provider}
 import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
-/**
-  * Created by shutty on 8/19/16.
+/** Created by shutty on 8/19/16.
   */
 case class GetObject()(implicit provider: Provider) extends LazyLogging {
   def route(bucket: String, path: String, params: Map[String, String]): Route = get {
@@ -75,31 +74,28 @@ case class GetObject()(implicit provider: Provider) extends LazyLogging {
     }
   }
 
-
-
   protected def handleTaggingRequest(meta: ObjectMetadata): HttpResponse = {
     val w = new StringWriter()
 
-    if (meta.getRawMetadata.containsKey("x-amz-tagging")){
+    if (meta.getRawMetadata.containsKey("x-amz-tagging")) {
       val doc =
         <Tagging xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
           <TagSet>
             {
-            meta.getRawMetadata.get("x-amz-tagging").asInstanceOf[String].split("&").map(
-              (rawTag: String) => {
-                rawTag.split("=", 2).map(
-                  (part: String) => URLDecoder.decode(part, "UTF-8")
-                )
-              }).map(
-              (kv: Array[String]) =>
-                <Tag>
+          meta.getRawMetadata
+            .get("x-amz-tagging")
+            .asInstanceOf[String]
+            .split("&")
+            .map((rawTag: String) => {
+              rawTag.split("=", 2).map((part: String) => URLDecoder.decode(part, "UTF-8"))
+            })
+            .map((kv: Array[String]) => <Tag>
                   <Key>{kv(0)}</Key>
                   <Value>{kv(1)}</Value>
                 </Tag>)
-            }
+        }
           </TagSet>
         </Tagging>
-
 
       xml.XML.write(w, doc, "UTF-8", xmlDecl = true, doctype = null)
     } else {
@@ -125,21 +121,27 @@ case class GetObject()(implicit provider: Provider) extends LazyLogging {
         case (key, value) =>
           RawHeader(key, value.toString)
       }.toList)
-      .toList.flatten
+      .toList
+      .flatten
       .filterNot(header => headerBlacklist.contains(header.lowercaseName))
 
-    val httpExpires = Option(metadata.getHttpExpiresDate).map(date => RawHeader(Headers.EXPIRES, DateUtils.formatRFC822Date(date)))
+    val httpExpires =
+      Option(metadata.getHttpExpiresDate).map(date => RawHeader(Headers.EXPIRES, DateUtils.formatRFC822Date(date)))
 
     val userHeaders = Option(metadata.getUserMetadata)
       .map(_.asScala.toMap)
-      .map(_.map { case (key, value) => {
-        val name = Option(key).map(_.trim).getOrElse("")
-        val hvalue = Option(value).map(_.trim).getOrElse("")
-        RawHeader(Headers.S3_USER_METADATA_PREFIX + name, hvalue)
-      }}.toList)
+      .map(_.map {
+        case (key, value) => {
+          val name = Option(key).map(_.trim).getOrElse("")
+          val hvalue = Option(value).map(_.trim).getOrElse("")
+          RawHeader(Headers.S3_USER_METADATA_PREFIX + name, hvalue)
+        }
+      }.toList)
       .toList
       .flatten
 
-    headers ++ httpExpires.toList ++ userHeaders ++ Option(metadata.getContentMD5).map(md5 => RawHeader(Headers.ETAG, md5))
+    headers ++ httpExpires.toList ++ userHeaders ++ Option(metadata.getContentMD5).map(md5 =>
+      RawHeader(Headers.ETAG, md5)
+    )
   }
 }

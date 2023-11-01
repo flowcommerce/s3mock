@@ -8,11 +8,10 @@ import io.findify.s3mock.provider.Provider
 
 import scala.util.{Failure, Success, Try}
 
-/**
-  * Created by shutty on 8/19/16.
+/** Created by shutty on 8/19/16.
   */
-case class DeleteBucket()(implicit provider:Provider) extends LazyLogging {
-  def route(bucket:String) = delete {
+case class DeleteBucket()(implicit provider: Provider) extends LazyLogging {
+  def route(bucket: String) = delete {
     complete {
       Try(provider.deleteBucket(bucket)) match {
         case Success(_) =>

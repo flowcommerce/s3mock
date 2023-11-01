@@ -8,7 +8,7 @@ import com.typesafe.config.ConfigFactory
   Not yet fixed :(
  */
 
-class TypesafeConfigTest  extends S3MockTest {
+class TypesafeConfigTest extends S3MockTest {
   override def behaviour(fixture: => Fixture) = {
 
     it should "load typesafe config files" ignore {

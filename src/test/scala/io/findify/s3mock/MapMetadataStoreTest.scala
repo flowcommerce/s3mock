@@ -7,13 +7,17 @@ import io.findify.s3mock.provider.metadata.{InMemoryMetadataStore, MapMetadataSt
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-/**
-  * Created by shutty on 3/13/17.
+
+/** Created by shutty on 3/13/17.
   */
 class MapMetadataStoreTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
 
-  for (metadataStore <- List((new MapMetadataStore("/tmp/s3"), "MapMetadataStore"),
-    (new InMemoryMetadataStore, "InMemoryMetadataStore"))) {
+  for (
+    metadataStore <- List(
+      (new MapMetadataStore("/tmp/s3"), "MapMetadataStore"),
+      (new InMemoryMetadataStore, "InMemoryMetadataStore")
+    )
+  ) {
     metadataStore._2 should behave like mdStoreBehaviour(metadataStore._1)
   }
 

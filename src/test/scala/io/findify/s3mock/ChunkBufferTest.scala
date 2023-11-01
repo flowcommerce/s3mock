@@ -4,13 +4,14 @@ import akka.util.ByteString
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-/**
-  * Created by shutty on 8/11/16.
+/** Created by shutty on 8/11/16.
   */
 class ChunkBufferTest extends AnyFlatSpec with Matchers {
   "chunk buffer" should "detect header" in {
     val cb = new ChunkBuffer()
-    cb.addChunk(ByteString("3;chunk-signature=1234567890123456789012345678901234567890123456789012345678901234\r\nfoo\r\n"))
+    cb.addChunk(
+      ByteString("3;chunk-signature=1234567890123456789012345678901234567890123456789012345678901234\r\nfoo\r\n")
+    )
     cb.readHeader shouldBe Some(Header(3, 84, "1234567890123456789012345678901234567890123456789012345678901234"))
   }
   it should "fail on non-complete header" in {
@@ -20,7 +21,9 @@ class ChunkBufferTest extends AnyFlatSpec with Matchers {
   }
   it should "pull complete chunks" in {
     val cb = new ChunkBuffer()
-    cb.addChunk(ByteString("3;chunk-signature=1234567890123456789012345678901234567890123456789012345678901234\r\nfoo\r\n"))
+    cb.addChunk(
+      ByteString("3;chunk-signature=1234567890123456789012345678901234567890123456789012345678901234\r\nfoo\r\n")
+    )
     val header = cb.readHeader.get
     val chunk = cb.pullChunk(header)
     chunk shouldBe Some(ByteString("foo"))

@@ -1,7 +1,6 @@
 package io.findify.s3mock.request
 
-/**
-  * Created by shutty on 3/13/17.
+/** Created by shutty on 3/13/17.
   */
 
 case class DeleteObjectsRequest(objects: Seq[String])

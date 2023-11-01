@@ -12,7 +12,6 @@ class ListBucketTest extends S3MockTest {
     implicit val sys = fixture.system
     implicit val mat = fixture.mat
 
-
     it should "list objects via alpakka" in {
       s3.createBucket("alpakkalist")
       s3.putObject("alpakkalist", "test1", "foobar")

@@ -8,8 +8,7 @@ import org.joda.time.DateTime
 
 import scala.jdk.CollectionConverters._
 
-/**
-  * Created by shutty on 8/9/16.
+/** Created by shutty on 8/9/16.
   */
 class ListBucketTest extends S3MockTest {
   override def behaviour(fixture: => Fixture) = {
@@ -118,7 +117,6 @@ class ListBucketTest extends S3MockTest {
       summaries2 shouldBe Nil
     }
 
-
     it should "obey delimiters && prefixes v3" in {
       s3.createBucket("list5")
       s3.putObject("list5", "dev/someEvent/2017/03/13/00/_SUCCESS", "xxx")
@@ -172,7 +170,7 @@ class ListBucketTest extends S3MockTest {
       req2.setBucketName("list8")
       req2.setDelimiter("/")
       req2.setPrefix("dev/someEvent/2017/03/13/00/_SUCCESS")
-      val list2  = s3.listObjects(req2)
+      val list2 = s3.listObjects(req2)
       list2.getObjectSummaries.size shouldEqual 1
       list2.getObjectSummaries.asScala.head.getKey shouldEqual "dev/someEvent/2017/03/13/00/_SUCCESS"
     }
@@ -200,7 +198,9 @@ class ListBucketTest extends S3MockTest {
       s3.createBucket("list10")
       s3.putObject("list10", "foo", "xxx")
       val list = s3.listObjects("list10").getObjectSummaries.asScala.toList
-      list.find(_.getKey == "foo").map(_.getLastModified.after(DateTime.now().minusMinutes(1).toDate)) shouldBe Some(true)
+      list.find(_.getKey == "foo").map(_.getLastModified.after(DateTime.now().minusMinutes(1).toDate)) shouldBe Some(
+        true
+      )
     }
   }
 }
